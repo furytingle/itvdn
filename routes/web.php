@@ -18,3 +18,14 @@ Route::get('/', function () {
 Route::get('/test', function () {
     return "ITVDN LARAVEL";
 });
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
+
+Route::get('/roles', function () {
+    $user = \Illuminate\Support\Facades\Auth::user();
+
+    return response()->json([
+        'roles' => $user->roles
+    ]);
+});
