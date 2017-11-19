@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Requests\RegisterRequest;
+use App\Models\Role;
 use App\Models\User;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
 
 class RegisterController extends Controller
@@ -39,19 +41,14 @@ class RegisterController extends Controller
         $this->middleware('guest');
     }
 
-    /**
-     * Get a validator for an incoming registration request.
-     *
-     * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
-    protected function validator(array $data)
+    public function register(RegisterRequest $request)
     {
-        return Validator::make($data, [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
+        event(new Registered($user = $this->create($request->all())));
+
+        $this->guard()->login($user);
+
+        return $this->registered($request, $user)
+            ?: redirect($this->redirectPath());
     }
 
     /**
@@ -62,10 +59,19 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => bcrypt($data['password']),
-        ]);
+        try {
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => bcrypt($data['password']),
+            ]);
+
+            $role = Role::where('slug', 'author')->first();
+            $user->roles()->attach($role);
+
+            return $user;
+        } catch (\Exception $e) {
+            log($e->getMessage());
+        }
     }
 }
