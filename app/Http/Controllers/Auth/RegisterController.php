@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Requests\RegisterRequest;
+use App\Jobs\SendRegistrationMail;
+use App\Mail\RegistrationMail;
 use App\Models\Role;
 use App\Models\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Support\Facades\Mail;
 
 class RegisterController extends Controller
 {
@@ -46,6 +49,8 @@ class RegisterController extends Controller
         event(new Registered($user = $this->create($request->all())));
 
         $this->guard()->login($user);
+
+        Mail::to($user->email)->queue(new RegistrationMail($user->name));
 
         return $this->registered($request, $user)
             ?: redirect($this->redirectPath());
