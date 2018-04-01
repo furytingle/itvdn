@@ -52,6 +52,7 @@ class PostController extends Controller
         }
 
         $request->session()->flash('flash_message', 'Post saved');
+
         return redirect()->route('post.index');
     }
 

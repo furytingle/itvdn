@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Helpers\TestHelper;
-use App\Http\Interfaces\HelperInterface;
+use App\Components\SuperComponent;
+use App\Contracts\SuperContract;
+use App\Facades\Super;
 use Illuminate\Http\Request;
 
 class TestController extends Controller
 {
-    public function __construct(TestHelper $helper)
+    public function testProvider()
     {
-        parent::__construct($helper);
+        return view('provider');
     }
 
-    public function myMethod()
+    public function testContract(SuperContract $component)
     {
-        //
+        return $component->getName();
     }
 }

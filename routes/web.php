@@ -28,3 +28,7 @@ Route::get('/admin', function () {
     ->middleware('can:edit-posts');
 
 Route::resource('post', 'PostController');
+
+Route::get('test-provider', 'TestController@testProvider');
+
+Route::get('test-contract', 'TestController@testContract');
